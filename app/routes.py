@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 
 from .auth import generate_token, login_required
-from .database import db
+from .database.database import db
 from .models import User, UserRole
 from .services import UserService
 

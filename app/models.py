@@ -1,6 +1,6 @@
 from enum import Enum
 
-from .database import db
+from .database.database import db
 
 
 class UserRole(str, Enum):
