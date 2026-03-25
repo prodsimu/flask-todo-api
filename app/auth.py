@@ -62,3 +62,17 @@ def admin_required(f):
         return f(user_id=user_id, *args, **kwargs)
 
     return decorated
+
+
+def self_or_admin_required(f):
+    @wraps(f)
+    @login_required
+    def decorated(user_id, target_user_id, *args, **kwargs):
+        current_user = User.query.get(user_id)
+
+        if current_user.role != UserRole.ADMIN.value and user_id != target_user_id:
+            return {"error": "Permission denied"}, 403
+
+        return f(user_id=user_id, target_user_id=target_user_id, *args, **kwargs)
+
+    return decorated
