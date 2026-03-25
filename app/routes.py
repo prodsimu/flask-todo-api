@@ -25,9 +25,6 @@ def register():
         return jsonify({"error": str(e)}), 400
 
 
-# AUTH
-
-
 @user_bp.route("/login", methods=["POST"])
 def login():
     try:
@@ -51,9 +48,6 @@ def login():
         return jsonify({"error": str(e)}), 401
 
 
-# GET USERS
-
-
 @user_bp.route("/users", methods=["GET"])
 @login_required
 def list_users(user_id):
@@ -71,9 +65,6 @@ def list_users(user_id):
     )
 
 
-# POST USERS
-
-
 @user_bp.route("/users", methods=["POST"])
 @login_required
 def create_user_admin(user_id):
@@ -88,3 +79,12 @@ def create_user_admin(user_id):
     )
 
     return jsonify({"id": user.id, "username": user.username, "role": user.role}), 201
+
+
+@user_bp.route("/profile", methods=["GET"])
+@login_required
+def profile(user_id):
+    user = User.query.get(user_id)
+    return jsonify(
+        {"id": user.id, "name": user.name, "username": user.username, "role": user.role}
+    )
