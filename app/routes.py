@@ -50,7 +50,7 @@ def login():
 
 @user_bp.route("/users", methods=["GET"])
 @admin_required
-def list_users():
+def list_users(user_id):
     users = UserService.list_users()
 
     return (
@@ -66,7 +66,7 @@ def list_users():
 
 @user_bp.route("/users", methods=["POST"])
 @admin_required
-def create_user_admin():
+def create_user_admin(user_id):
 
     data = request.get_json()
     user = UserService.create_user(
