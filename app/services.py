@@ -55,6 +55,12 @@ class UserService:
 
     # DELETE
 
+    @staticmethod
+    def delete(user_id):
+        user = User.query.get_or_404(user_id)
+        db.session.delete(user)
+        db.session.commit()
+
     # AUTH
 
     @staticmethod
