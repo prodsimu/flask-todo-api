@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 
 from app.database.database import db
@@ -28,3 +29,18 @@ class User(db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
     role = db.Column(db.String(10), nullable=False, default=UserRole.USER.value)
+
+
+class Project(db.Model):
+    __tablename__ = "projects"
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(255), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    owner = db.relationship("User", back_populates="projects")
+    tasks = db.relationship(
+        "Task", back_populates="project", cascade="all, delete-orphan"
+    )
