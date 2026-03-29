@@ -14,6 +14,12 @@ class TaskStatus(str, Enum):
     DONE = "done"
 
 
+class TaskPriority(str, Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+
+
 class User(db.Model):
     __tablename__ = "users"
 
