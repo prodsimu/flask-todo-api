@@ -31,3 +31,23 @@ def create_project(user_id):
 
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+
+
+@project_bp.route("/projects", methods=["GET"])
+@login_required
+def list_projects(user_id):
+    projects = ProjectService.list_projects(owner_id=user_id)
+    return (
+        jsonify(
+            [
+                {
+                    "id": p.id,
+                    "title": p.title,
+                    "description": p.description,
+                    "created_at": p.created_at.isoformat(),
+                }
+                for p in projects
+            ]
+        ),
+        200,
+    )
