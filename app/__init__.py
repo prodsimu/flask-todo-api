@@ -19,9 +19,11 @@ def create_app():
 
     db.init_app(app)
 
-    from app.routes import user_bp
+    from app.routes import project_bp, task_bp, user_bp
 
     app.register_blueprint(user_bp)
+    app.register_blueprint(project_bp)
+    app.register_blueprint(task_bp)
 
     with app.app_context():
         db.create_all()
