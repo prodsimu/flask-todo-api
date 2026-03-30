@@ -45,3 +45,17 @@ class TaskService:
         db.session.commit()
 
         return task
+
+    # READ
+
+    @staticmethod
+    def list_tasks(project_id: int, owner_id: int):
+        project = db.session.get(Project, project_id)
+
+        if not project:
+            raise ValueError("Project not found.")
+
+        if project.owner_id != owner_id:
+            raise PermissionError("Access denied.")
+
+        return Task.query.filter_by(project_id=project_id).all()
