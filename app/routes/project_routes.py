@@ -6,31 +6,7 @@ from app.services.project_service import ProjectService
 project_bp = Blueprint("projects", __name__)
 
 
-@project_bp.route("/projects", methods=["POST"])
-@login_required
-def create_project(user_id):
-    data = request.get_json()
-
-    try:
-        project = ProjectService.create_project(
-            owner_id=user_id,
-            title=data.get("title"),
-            description=data.get("description"),
-        )
-        return (
-            jsonify(
-                {
-                    "id": project.id,
-                    "title": project.title,
-                    "description": project.description,
-                    "created_at": project.created_at.isoformat(),
-                }
-            ),
-            201,
-        )
-
-    except ValueError as e:
-        return jsonify({"error": str(e)}), 400
+# GET
 
 
 @project_bp.route("/projects", methods=["GET"])
@@ -77,6 +53,39 @@ def get_project(user_id, project_id):
         return jsonify({"error": str(e)}), 403
 
 
+# POST
+
+
+@project_bp.route("/projects", methods=["POST"])
+@login_required
+def create_project(user_id):
+    data = request.get_json()
+
+    try:
+        project = ProjectService.create_project(
+            owner_id=user_id,
+            title=data.get("title"),
+            description=data.get("description"),
+        )
+        return (
+            jsonify(
+                {
+                    "id": project.id,
+                    "title": project.title,
+                    "description": project.description,
+                    "created_at": project.created_at.isoformat(),
+                }
+            ),
+            201,
+        )
+
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+
+# PUT
+
+
 @project_bp.route("/projects/<int:project_id>", methods=["PUT"])
 @login_required
 def update_project(user_id, project_id):
@@ -105,6 +114,9 @@ def update_project(user_id, project_id):
 
     except PermissionError as e:
         return jsonify({"error": str(e)}), 403
+
+
+# DELETE
 
 
 @project_bp.route("/projects/<int:project_id>", methods=["DELETE"])

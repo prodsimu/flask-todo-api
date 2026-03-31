@@ -13,6 +13,36 @@ from app.services.user_service import UserService
 user_bp = Blueprint("users", __name__)
 
 
+# GET
+
+
+@user_bp.route("/users", methods=["GET"])
+@admin_required
+def list_users(user_id):
+    users = UserService.list_users()
+    return (
+        jsonify(
+            [
+                {"id": u.id, "name": u.name, "username": u.username, "role": u.role}
+                for u in users
+            ]
+        ),
+        200,
+    )
+
+
+@user_bp.route("/profile", methods=["GET"])
+@login_required
+def profile(user_id):
+    user = db.session.get(User, user_id)
+    return jsonify(
+        {"id": user.id, "name": user.name, "username": user.username, "role": user.role}
+    )
+
+
+# POST
+
+
 @user_bp.route("/register", methods=["POST"])
 def register():
     try:
@@ -49,21 +79,6 @@ def login():
         return jsonify({"error": str(e)}), 401
 
 
-@user_bp.route("/users", methods=["GET"])
-@admin_required
-def list_users(user_id):
-    users = UserService.list_users()
-    return (
-        jsonify(
-            [
-                {"id": u.id, "name": u.name, "username": u.username, "role": u.role}
-                for u in users
-            ]
-        ),
-        200,
-    )
-
-
 @user_bp.route("/users", methods=["POST"])
 @admin_required
 def create_user_admin(user_id):
@@ -83,13 +98,7 @@ def create_user_admin(user_id):
         return jsonify({"error": str(e)}), 400
 
 
-@user_bp.route("/profile", methods=["GET"])
-@login_required
-def profile(user_id):
-    user = db.session.get(User, user_id)
-    return jsonify(
-        {"id": user.id, "name": user.name, "username": user.username, "role": user.role}
-    )
+# PUT
 
 
 @user_bp.route("/profile/password", methods=["PUT"])
@@ -127,6 +136,9 @@ def update_user(user_id, target_user_id):
 
     except ValueError as e:
         return {"error": str(e)}, 400
+
+
+# DELETE
 
 
 @user_bp.route("/users/<int:target_user_id>", methods=["DELETE"])
