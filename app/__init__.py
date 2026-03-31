@@ -14,7 +14,7 @@ def create_app():
         raise RuntimeError("SECRET_KEY environment variable is not set.")
 
     app.config["SECRET_KEY"] = secret_key
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///users.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     db.init_app(app)
@@ -30,6 +30,6 @@ def create_app():
         created = seed_admin()
 
         if created:
-            print("Admin created: username=admin | password=admin123456")
+            print("Admin created")
 
     return app
