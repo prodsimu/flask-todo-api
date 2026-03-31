@@ -12,8 +12,16 @@ task_bp = Blueprint("tasks", __name__)
 @task_bp.route("/projects/<int:project_id>/tasks", methods=["GET"])
 @login_required
 def list_tasks(user_id, project_id):
+    status = request.args.get("status")
+    priority = request.args.get("priority")
+
     try:
-        tasks = TaskService.list_tasks(project_id=project_id, owner_id=user_id)
+        tasks = TaskService.list_tasks(
+            project_id=project_id,
+            owner_id=user_id,
+            status=status,
+            priority=priority,
+        )
         return (
             jsonify(
                 [
@@ -23,6 +31,7 @@ def list_tasks(user_id, project_id):
                         "description": t.description,
                         "status": t.status,
                         "priority": t.priority,
+                        "position": t.position,
                         "created_at": t.created_at.isoformat(),
                     }
                     for t in tasks
@@ -32,7 +41,7 @@ def list_tasks(user_id, project_id):
         )
 
     except ValueError as e:
-        return jsonify({"error": str(e)}), 404
+        return jsonify({"error": str(e)}), 400
 
     except PermissionError as e:
         return jsonify({"error": str(e)}), 403
@@ -55,6 +64,7 @@ def get_task(user_id, project_id, task_id):
                     "description": task.description,
                     "status": task.status,
                     "priority": task.priority,
+                    "position": task.position,
                     "created_at": task.created_at.isoformat(),
                 }
             ),
@@ -92,6 +102,7 @@ def create_task(user_id, project_id):
                     "description": task.description,
                     "status": task.status,
                     "priority": task.priority,
+                    "position": task.position,
                     "created_at": task.created_at.isoformat(),
                 }
             ),
@@ -128,6 +139,45 @@ def update_task(user_id, project_id, task_id):
                     "description": task.description,
                     "status": task.status,
                     "priority": task.priority,
+                    "position": task.position,
+                    "created_at": task.created_at.isoformat(),
+                }
+            ),
+            200,
+        )
+
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+    except PermissionError as e:
+        return jsonify({"error": str(e)}), 403
+
+
+# PATCH
+
+
+@task_bp.route("/projects/<int:project_id>/tasks/<int:task_id>/move", methods=["PATCH"])
+@login_required
+def move_task(user_id, project_id, task_id):
+    data = request.get_json()
+
+    try:
+        task = TaskService.move_task(
+            project_id=project_id,
+            task_id=task_id,
+            owner_id=user_id,
+            new_status=data.get("status"),
+            new_position=data.get("position", 0),
+        )
+        return (
+            jsonify(
+                {
+                    "id": task.id,
+                    "title": task.title,
+                    "description": task.description,
+                    "status": task.status,
+                    "priority": task.priority,
+                    "position": task.position,
                     "created_at": task.created_at.isoformat(),
                 }
             ),
