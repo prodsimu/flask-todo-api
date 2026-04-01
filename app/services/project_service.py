@@ -38,17 +38,25 @@ class ProjectService:
     # READ
 
     @staticmethod
-    def list_projects(owner_id: int):
-        return Project.query.filter_by(owner_id=owner_id).all()
+    def list_projects(user_id: int):
+        owned = Project.query.filter_by(owner_id=user_id).all()
+
+        memberships = ProjectMember.query.filter_by(user_id=user_id).all()
+        member_of = [m.project for m in memberships]
+
+        return owned + member_of
 
     @staticmethod
-    def get_project(project_id: int, owner_id: int):
+    def get_project(project_id: int, user_id: int):
         project = db.session.get(Project, project_id)
 
         if not project:
             raise ValueError("Project not found.")
 
-        if project.owner_id != owner_id:
+        is_owner = project.owner_id == user_id
+        is_member = ProjectService._get_member(project_id, user_id)
+
+        if not is_owner and not is_member:
             raise PermissionError("Access denied.")
 
         return project
@@ -57,7 +65,13 @@ class ProjectService:
 
     @staticmethod
     def update_project(project_id: int, owner_id: int, data: dict):
-        project = ProjectService.get_project(project_id, owner_id)
+        project = db.session.get(Project, project_id)
+
+        if not project:
+            raise ValueError("Project not found.")
+
+        if project.owner_id != owner_id:
+            raise PermissionError("Only the project owner can edit it.")
 
         if "title" in data:
             if not data["title"] or len(data["title"].strip()) == 0:
@@ -79,7 +93,13 @@ class ProjectService:
 
     @staticmethod
     def delete_project(project_id: int, owner_id: int):
-        project = ProjectService.get_project(project_id, owner_id)
+        project = db.session.get(Project, project_id)
+
+        if not project:
+            raise ValueError("Project not found.")
+
+        if project.owner_id != owner_id:
+            raise PermissionError("Only the project owner can delete it.")
 
         db.session.delete(project)
         db.session.commit()
