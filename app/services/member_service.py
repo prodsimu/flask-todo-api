@@ -56,3 +56,23 @@ class MemberService:
         db.session.commit()
 
         return member
+
+    # READ
+
+    @staticmethod
+    def list_members(project_id: int, requester_id: int):
+        project = db.session.get(Project, project_id)
+
+        if not project:
+            raise ValueError("Project not found.")
+
+        is_owner = project.owner_id == requester_id
+        is_member = ProjectMember.query.filter_by(
+            project_id=project_id,
+            user_id=requester_id,
+        ).first()
+
+        if not is_owner and not is_member:
+            raise PermissionError("Access denied.")
+
+        return ProjectMember.query.filter_by(project_id=project_id).all()
