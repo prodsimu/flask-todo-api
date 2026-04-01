@@ -38,6 +38,9 @@ class User(db.Model):
     projects = db.relationship(
         "Project", back_populates="owner", cascade="all, delete-orphan"
     )
+    memberships = db.relationship(
+        "ProjectMember", back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class Project(db.Model):
