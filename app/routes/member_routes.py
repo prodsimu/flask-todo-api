@@ -77,4 +77,39 @@ def add_member(user_id, project_id):
 
 # PUT
 
+
+@member_bp.route(
+    "/projects/<int:project_id>/members/<int:target_user_id>", methods=["PUT"]
+)
+@login_required
+def update_member_role(user_id, project_id, target_user_id):
+    data = request.get_json()
+
+    try:
+        member = MemberService.update_member_role(
+            project_id=project_id,
+            owner_id=user_id,
+            target_user_id=target_user_id,
+            role=data.get("role"),
+        )
+        return (
+            jsonify(
+                {
+                    "id": member.id,
+                    "user_id": member.user_id,
+                    "username": member.user.username,
+                    "role": member.role,
+                    "joined_at": member.joined_at.isoformat(),
+                }
+            ),
+            200,
+        )
+
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+    except PermissionError as e:
+        return jsonify({"error": str(e)}), 403
+
+
 # DELETE
