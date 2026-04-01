@@ -18,7 +18,7 @@ def list_tasks(user_id, project_id):
     try:
         tasks = TaskService.list_tasks(
             project_id=project_id,
-            owner_id=user_id,
+            user_id=user_id,
             status=status,
             priority=priority,
         )
