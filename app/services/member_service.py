@@ -76,3 +76,27 @@ class MemberService:
             raise PermissionError("Access denied.")
 
         return ProjectMember.query.filter_by(project_id=project_id).all()
+
+    # UPDATE
+
+    @staticmethod
+    def update_member_role(
+        project_id: int, owner_id: int, target_user_id: int, role: str
+    ):
+        MemberService._get_project_as_owner(project_id, owner_id)
+
+        if role not in [r.value for r in MemberRole]:
+            raise ValueError("Invalid role.")
+
+        member = ProjectMember.query.filter_by(
+            project_id=project_id,
+            user_id=target_user_id,
+        ).first()
+
+        if not member:
+            raise ValueError("Member not found.")
+
+        member.role = role
+        db.session.commit()
+
+        return member
