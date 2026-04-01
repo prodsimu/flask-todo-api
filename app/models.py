@@ -21,6 +21,11 @@ class TaskPriority(str, Enum):
     HIGH = "high"
 
 
+class MemberRole(str, Enum):
+    VIEWER = "viewer"
+    EDITOR = "editor"
+
+
 class User(db.Model):
     __tablename__ = "users"
 
