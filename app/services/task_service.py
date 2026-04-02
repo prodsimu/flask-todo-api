@@ -39,12 +39,12 @@ class TaskService:
     @staticmethod
     def create_task(
         project_id: int,
-        owner_id: int,
+        user_id: int,
         title: str,
         description: str = None,
         priority: str = TaskPriority.MEDIUM.value,
     ):
-        TaskService._check_access(project_id, owner_id, require_editor=True)
+        TaskService._check_access(project_id, user_id, require_editor=True)
 
         if not title or len(title.strip()) == 0:
             raise ValueError("Title is required.")
