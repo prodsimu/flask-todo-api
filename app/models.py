@@ -76,6 +76,23 @@ class Task(db.Model):
 
     project_id = db.Column(db.Integer, db.ForeignKey("projects.id"), nullable=False)
     project = db.relationship("Project", back_populates="tasks")
+    history = db.relationship(
+        "TaskHistory", back_populates="task", cascade="all, delete-orphan"
+    )
+
+
+class TaskHistory(db.Model):
+    __tablename__ = "task_history"
+
+    id = db.Column(db.Integer, primary_key=True)
+    field = db.Column(db.String(50), nullable=False)
+    old_value = db.Column(db.String(255), nullable=True)
+    new_value = db.Column(db.String(255), nullable=True)
+    changed_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    changed_by = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    task_id = db.Column(db.Integer, db.ForeignKey("tasks.id"), nullable=False)
+    task = db.relationship("Task", back_populates="history")
 
 
 class ProjectMember(db.Model):
