@@ -12,18 +12,31 @@ project_bp = Blueprint("projects", __name__)
 @project_bp.route("/projects", methods=["GET"])
 @login_required
 def list_projects(user_id):
-    projects = ProjectService.list_projects(user_id=user_id)
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 10, type=int)
+    search = request.args.get("search", None)
+
+    result = ProjectService.list_projects(
+        user_id=user_id,
+        page=page,
+        per_page=per_page,
+        search=search,
+    )
+
     return (
         jsonify(
-            [
-                {
-                    "id": p.id,
-                    "title": p.title,
-                    "description": p.description,
-                    "created_at": p.created_at.isoformat(),
-                }
-                for p in projects
-            ]
+            {
+                "data": [
+                    {
+                        "id": p.id,
+                        "title": p.title,
+                        "description": p.description,
+                        "created_at": p.created_at.isoformat(),
+                    }
+                    for p in result["data"]
+                ],
+                "pagination": result["pagination"],
+            }
         ),
         200,
     )
@@ -33,7 +46,7 @@ def list_projects(user_id):
 @login_required
 def get_project(user_id, project_id):
     try:
-        project = ProjectService.get_project(project_id=project_id, owner_id=user_id)
+        project = ProjectService.get_project(project_id=project_id, user_id=user_id)
         return (
             jsonify(
                 {
