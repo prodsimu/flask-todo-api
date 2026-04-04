@@ -19,13 +19,20 @@ user_bp = Blueprint("users", __name__)
 @user_bp.route("/users", methods=["GET"])
 @admin_required
 def list_users(user_id):
-    users = UserService.list_users()
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 10, type=int)
+
+    result = UserService.list_users(page=page, per_page=per_page)
+
     return (
         jsonify(
-            [
-                {"id": u.id, "name": u.name, "username": u.username, "role": u.role}
-                for u in users
-            ]
+            {
+                "data": [
+                    {"id": u.id, "name": u.name, "username": u.username, "role": u.role}
+                    for u in result["data"]
+                ],
+                "pagination": result["pagination"],
+            }
         ),
         200,
     )
