@@ -1,15 +1,22 @@
-from flask import Blueprint, jsonify, request
+from flask import jsonify, request
+from flask_openapi3 import APIBlueprint
 
 from app.auth import login_required
+from app.schemas import (
+    CreateProjectBody,
+    ProjectListResponse,
+    ProjectResponse,
+    UpdateProjectBody,
+)
 from app.services.project_service import ProjectService
 
-project_bp = Blueprint("projects", __name__)
+project_bp = APIBlueprint("projects", __name__)
 
 
 # GET
 
 
-@project_bp.route("/projects", methods=["GET"])
+@project_bp.get("/projects", responses={"200": ProjectListResponse})
 @login_required
 def list_projects(user_id):
     page = request.args.get("page", 1, type=int)
@@ -42,7 +49,7 @@ def list_projects(user_id):
     )
 
 
-@project_bp.route("/projects/<int:project_id>", methods=["GET"])
+@project_bp.get("/projects/<int:project_id>", responses={"200": ProjectResponse})
 @login_required
 def get_project(user_id, project_id):
     try:
@@ -69,16 +76,14 @@ def get_project(user_id, project_id):
 # POST
 
 
-@project_bp.route("/projects", methods=["POST"])
+@project_bp.post("/projects", responses={"201": ProjectResponse})
 @login_required
-def create_project(user_id):
-    data = request.get_json()
-
+def create_project(user_id, body: CreateProjectBody):
     try:
         project = ProjectService.create_project(
             owner_id=user_id,
-            title=data.get("title"),
-            description=data.get("description"),
+            title=body.title,
+            description=body.description,
         )
         return (
             jsonify(
@@ -99,10 +104,10 @@ def create_project(user_id):
 # PUT
 
 
-@project_bp.route("/projects/<int:project_id>", methods=["PUT"])
+@project_bp.put("/projects/<int:project_id>", responses={"200": ProjectResponse})
 @login_required
-def update_project(user_id, project_id):
-    data = request.get_json()
+def update_project(user_id, project_id, body: UpdateProjectBody):
+    data = body.model_dump(exclude_none=True)
 
     try:
         project = ProjectService.update_project(
@@ -132,7 +137,7 @@ def update_project(user_id, project_id):
 # DELETE
 
 
-@project_bp.route("/projects/<int:project_id>", methods=["DELETE"])
+@project_bp.delete("/projects/<int:project_id>")
 @login_required
 def delete_project(user_id, project_id):
     try:
