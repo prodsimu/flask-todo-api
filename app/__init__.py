@@ -1,13 +1,14 @@
 import os
 
-from flask import Flask
+from flask_openapi3 import Info, OpenAPI
 
 from app.database.database import db
 from app.database.seeds import seed_admin
 
 
 def create_app():
-    app = Flask(__name__)
+    info = Info(title="Task Manager API", version="1.0.0")
+    app = OpenAPI(__name__, info=info)
 
     secret_key = os.environ.get("SECRET_KEY")
     if not secret_key:
