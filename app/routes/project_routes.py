@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from flask_openapi3 import APIBlueprint
+from flask_openapi3 import APIBlueprint, Tag
 
 from app.auth import login_required
 from app.schemas import (
@@ -10,13 +10,16 @@ from app.schemas import (
 )
 from app.services.project_service import ProjectService
 
-project_bp = APIBlueprint("projects", __name__)
+security = [{"BearerAuth": []}]
+
+tag = Tag(name="Projects", description="Gerenciamento de projetos")
+project_bp = APIBlueprint("projects", __name__, abp_tags=[tag])
 
 
 # GET
 
 
-@project_bp.get("/projects", responses={"200": ProjectListResponse})
+@project_bp.get("/projects", responses={"200": ProjectListResponse}, security=security)
 @login_required
 def list_projects(user_id):
     page = request.args.get("page", 1, type=int)
@@ -49,7 +52,9 @@ def list_projects(user_id):
     )
 
 
-@project_bp.get("/projects/<int:project_id>", responses={"200": ProjectResponse})
+@project_bp.get(
+    "/projects/<int:project_id>", responses={"200": ProjectResponse}, security=security
+)
 @login_required
 def get_project(user_id, project_id):
     try:
@@ -76,7 +81,7 @@ def get_project(user_id, project_id):
 # POST
 
 
-@project_bp.post("/projects", responses={"201": ProjectResponse})
+@project_bp.post("/projects", responses={"201": ProjectResponse}, security=security)
 @login_required
 def create_project(user_id, body: CreateProjectBody):
     try:
@@ -104,7 +109,9 @@ def create_project(user_id, body: CreateProjectBody):
 # PUT
 
 
-@project_bp.put("/projects/<int:project_id>", responses={"200": ProjectResponse})
+@project_bp.put(
+    "/projects/<int:project_id>", responses={"200": ProjectResponse}, security=security
+)
 @login_required
 def update_project(user_id, project_id, body: UpdateProjectBody):
     data = body.model_dump(exclude_none=True)
@@ -137,7 +144,7 @@ def update_project(user_id, project_id, body: UpdateProjectBody):
 # DELETE
 
 
-@project_bp.delete("/projects/<int:project_id>")
+@project_bp.delete("/projects/<int:project_id>", security=security)
 @login_required
 def delete_project(user_id, project_id):
     try:

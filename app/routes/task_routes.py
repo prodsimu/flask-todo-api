@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from flask_openapi3 import APIBlueprint
+from flask_openapi3 import APIBlueprint, Tag
 
 from app.auth import login_required
 from app.schemas import (
@@ -12,13 +12,20 @@ from app.schemas import (
 )
 from app.services.task_service import TaskService
 
-task_bp = APIBlueprint("tasks", __name__)
+security = [{"BearerAuth": []}]
+
+tag = Tag(name="Tasks", description="Gerenciamento de tarefas")
+task_bp = APIBlueprint("tasks", __name__, abp_tags=[tag])
 
 
 # GET
 
 
-@task_bp.get("/projects/<int:project_id>/tasks", responses={"200": TaskListResponse})
+@task_bp.get(
+    "/projects/<int:project_id>/tasks",
+    responses={"200": TaskListResponse},
+    security=security,
+)
 @login_required
 def list_tasks(user_id, project_id):
     status = request.args.get("status")
@@ -66,7 +73,9 @@ def list_tasks(user_id, project_id):
 
 
 @task_bp.get(
-    "/projects/<int:project_id>/tasks/<int:task_id>", responses={"200": TaskResponse}
+    "/projects/<int:project_id>/tasks/<int:task_id>",
+    responses={"200": TaskResponse},
+    security=security,
 )
 @login_required
 def get_task(user_id, project_id, task_id):
@@ -101,6 +110,7 @@ def get_task(user_id, project_id, task_id):
 @task_bp.get(
     "/projects/<int:project_id>/tasks/<int:task_id>/history",
     responses={"200": TaskHistoryResponse},
+    security=security,
 )
 @login_required
 def get_task_history(user_id, project_id, task_id):
@@ -137,7 +147,11 @@ def get_task_history(user_id, project_id, task_id):
 # POST
 
 
-@task_bp.post("/projects/<int:project_id>/tasks", responses={"201": TaskResponse})
+@task_bp.post(
+    "/projects/<int:project_id>/tasks",
+    responses={"201": TaskResponse},
+    security=security,
+)
 @login_required
 def create_task(user_id, project_id, body: CreateTaskBody):
     try:
@@ -176,6 +190,7 @@ def create_task(user_id, project_id, body: CreateTaskBody):
 @task_bp.put(
     "/projects/<int:project_id>/tasks/<int:task_id>",
     responses={"200": TaskResponse},
+    security=security,
 )
 @login_required
 def update_task(user_id, project_id, task_id, body: UpdateTaskBody):
@@ -216,6 +231,7 @@ def update_task(user_id, project_id, task_id, body: UpdateTaskBody):
 @task_bp.patch(
     "/projects/<int:project_id>/tasks/<int:task_id>/move",
     responses={"200": TaskResponse},
+    security=security,
 )
 @login_required
 def move_task(user_id, project_id, task_id, body: MoveTaskBody):
@@ -252,7 +268,7 @@ def move_task(user_id, project_id, task_id, body: MoveTaskBody):
 # DELETE
 
 
-@task_bp.delete("/projects/<int:project_id>/tasks/<int:task_id>")
+@task_bp.delete("/projects/<int:project_id>/tasks/<int:task_id>", security=security)
 @login_required
 def delete_task(user_id, project_id, task_id):
     try:

@@ -1,5 +1,5 @@
 from flask import jsonify
-from flask_openapi3 import APIBlueprint
+from flask_openapi3 import APIBlueprint, Tag
 
 from app.auth import login_required
 from app.schemas import (
@@ -9,7 +9,11 @@ from app.schemas import (
 )
 from app.services.member_service import MemberService
 
-member_bp = APIBlueprint("members", __name__)
+security = [{"BearerAuth": []}]
+
+
+tag = Tag(name="Members", description="Gerenciamento de membros")
+member_bp = APIBlueprint("members", __name__, abp_tags=[tag])
 
 
 # GET
@@ -18,6 +22,7 @@ member_bp = APIBlueprint("members", __name__)
 @member_bp.get(
     "/projects/<int:project_id>/members",
     responses={"200": MemberResponse},
+    security=security,
 )
 @login_required
 def list_members(user_id, project_id):
@@ -55,6 +60,7 @@ def list_members(user_id, project_id):
 @member_bp.post(
     "/projects/<int:project_id>/members",
     responses={"201": MemberResponse},
+    security=security,
 )
 @login_required
 def add_member(user_id, project_id, body: AddMemberBody):
@@ -91,6 +97,7 @@ def add_member(user_id, project_id, body: AddMemberBody):
 @member_bp.put(
     "/projects/<int:project_id>/members/<int:target_user_id>",
     responses={"200": MemberResponse},
+    security=security,
 )
 @login_required
 def update_member_role(user_id, project_id, target_user_id, body: UpdateMemberRoleBody):
@@ -124,7 +131,9 @@ def update_member_role(user_id, project_id, target_user_id, body: UpdateMemberRo
 # DELETE
 
 
-@member_bp.delete("/projects/<int:project_id>/members/<int:target_user_id>")
+@member_bp.delete(
+    "/projects/<int:project_id>/members/<int:target_user_id>", security=security
+)
 @login_required
 def remove_member(user_id, project_id, target_user_id):
     try:

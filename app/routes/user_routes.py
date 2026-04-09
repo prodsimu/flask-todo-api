@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from flask_openapi3 import APIBlueprint
+from flask_openapi3 import APIBlueprint, Tag
 
 from app.auth import (
     admin_required,
@@ -20,13 +20,16 @@ from app.schemas import (
 )
 from app.services.user_service import UserService
 
-user_bp = APIBlueprint("users", __name__)
+security = [{"BearerAuth": []}]
+
+tag = Tag(name="Users", description="Gerenciamento de usuários")
+user_bp = APIBlueprint("users", __name__, abp_tags=[tag])
 
 
 # GET
 
 
-@user_bp.get("/users", responses={"200": UserListResponse})
+@user_bp.get("/users", responses={"200": UserListResponse}, security=security)
 @admin_required
 def list_users(user_id):
     page = request.args.get("page", 1, type=int)
@@ -48,7 +51,7 @@ def list_users(user_id):
     )
 
 
-@user_bp.get("/profile", responses={"200": UserResponse})
+@user_bp.get("/profile", responses={"200": UserResponse}, security=security)
 @login_required
 def profile(user_id):
     user = db.session.get(User, user_id)
@@ -95,7 +98,7 @@ def login(body: LoginBody):
         return jsonify({"error": str(e)}), 401
 
 
-@user_bp.post("/users", responses={"201": UserResponse})
+@user_bp.post("/users", responses={"201": UserResponse}, security=security)
 @admin_required
 def create_user_admin(user_id, body: RegisterBody):
     try:
@@ -116,7 +119,7 @@ def create_user_admin(user_id, body: RegisterBody):
 # PUT
 
 
-@user_bp.put("/profile/password")
+@user_bp.put("/profile/password", security=security)
 @login_required
 def update_password(user_id, body: UpdatePasswordBody):
     try:
@@ -127,7 +130,9 @@ def update_password(user_id, body: UpdatePasswordBody):
         return {"error": str(e)}, 400
 
 
-@user_bp.put("/users/<int:target_user_id>", responses={"200": UserResponse})
+@user_bp.put(
+    "/users/<int:target_user_id>", responses={"200": UserResponse}, security=security
+)
 @self_or_admin_required
 def update_user(user_id, target_user_id, body: UpdateUserBody):
     data = body.model_dump(exclude_none=True)
@@ -151,7 +156,7 @@ def update_user(user_id, target_user_id, body: UpdateUserBody):
 # DELETE
 
 
-@user_bp.delete("/users/<int:target_user_id>")
+@user_bp.delete("/users/<int:target_user_id>", security=security)
 @admin_required
 def delete_user(user_id, target_user_id):
     try:
